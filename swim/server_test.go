@@ -1,14 +1,20 @@
 package main
 
-import "testing"
+import (
+	"io/ioutil"
+	"log"
+	"testing"
+)
 
 func TestJoin(t *testing.T) {
 	var (
 		clientAddr = ":3001"
 		serverAddr = ":3000"
+		interval   = 10
+		logger     = log.New(ioutil.Discard, "", 0)
 	)
 
-	srv1 := NewServer(serverAddr)
+	srv1 := NewServer(serverAddr, interval, logger)
 	if err := srv1.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +26,7 @@ func TestJoin(t *testing.T) {
 		}
 	}()
 
-	srv2 := NewServer(clientAddr)
+	srv2 := NewServer(clientAddr, interval, logger)
 	if err := srv2.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -62,9 +68,11 @@ func TestJoinThird(t *testing.T) {
 		serverAddr       = ":3000"
 		firstClientAddr  = ":3001"
 		secondClientAddr = ":3002"
+		interval         = 10
+		logger           = log.New(ioutil.Discard, "", 0)
 	)
 
-	srv1 := NewServer(serverAddr)
+	srv1 := NewServer(serverAddr, interval, logger)
 	if err := srv1.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +84,7 @@ func TestJoinThird(t *testing.T) {
 		}
 	}()
 
-	srv2 := NewServer(firstClientAddr)
+	srv2 := NewServer(firstClientAddr, interval, logger)
 	if err := srv2.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +94,7 @@ func TestJoinThird(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	srv3 := NewServer(secondClientAddr)
+	srv3 := NewServer(secondClientAddr, interval, logger)
 	if err := srv3.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -146,9 +154,11 @@ func TestPing(t *testing.T) {
 	var (
 		serverAddr      = ":3000"
 		firstClientAddr = ":3001"
+		interval        = 10
+		logger          = log.New(ioutil.Discard, "", 0)
 	)
 
-	srv1 := NewServer(serverAddr)
+	srv1 := NewServer(serverAddr, interval, logger)
 
 	if err := srv1.Start(); err != nil {
 		t.Fatal(err)
@@ -161,7 +171,7 @@ func TestPing(t *testing.T) {
 		}
 	}()
 
-	srv2 := NewServer(firstClientAddr)
+	srv2 := NewServer(firstClientAddr, interval, logger)
 	if err := srv2.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -176,10 +186,7 @@ func TestPing(t *testing.T) {
 		Address: ":3003",
 	})
 
-	srv2.Ping(Member{
-		Name:    serverAddr,
-		Address: serverAddr,
-	})
+	srv2.Ping(serverAddr)
 
 	// Check first member
 	if len(srv1.Members.Members) != 3 {
@@ -205,8 +212,9 @@ func TestPing(t *testing.T) {
 	if _, ok := srv2.Members.Members[firstClientAddr]; !ok {
 		t.Error(srv2.BindAddr, "is missing", firstClientAddr, "in memberlist")
 	}
-	if len(srv2.Members.Updates) != 0 {
+	if len(srv2.Members.Updates) != 3 {
 		t.Errorf("unexpected update count: %d", len(srv2.Members.Updates))
+
 	}
 
 }
