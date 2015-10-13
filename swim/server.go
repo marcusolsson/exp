@@ -161,7 +161,7 @@ func (s *Server) Listen() error {
 	}
 }
 
-// gossip runs the SWIM ol.
+// gossip runs the SWIM protocol.
 func (s *Server) gossip() {
 	for {
 		<-time.After(s.GossipInterval)
