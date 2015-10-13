@@ -2,9 +2,24 @@ package main
 
 import (
 	"errors"
-	"log"
 	"math/rand"
 )
+
+// EventType is the event type.
+type EventType int
+
+// Available event types
+const (
+	Joined EventType = iota
+	Failed
+)
+
+// Update represents a change to the member list.
+type Update struct {
+	Member Member
+	Type   EventType
+	Round  int8
+}
 
 // Member is a node in a cluster.
 type Member struct {
@@ -36,8 +51,6 @@ func (l *List) Add(m Member) {
 		l.Members[m.Address] = m
 		l.Updates = append(l.Updates, Update{Member: m, Type: Joined})
 		delete(l.Failed, m.Address)
-
-		log.Println("added", m.Address)
 	}
 }
 
@@ -47,8 +60,6 @@ func (l *List) Remove(m Member) {
 		l.Failed[m.Address] = m
 		l.Updates = append(l.Updates, Update{Member: m, Type: Failed})
 		delete(l.Members, m.Address)
-
-		log.Println("removed", m.Address)
 	}
 }
 
@@ -110,20 +121,4 @@ func (l List) Random(k int, exclude ...Member) ([]Member, error) {
 	}
 
 	return result, nil
-}
-
-// EventType is the event type.
-type EventType int
-
-// Available event types
-const (
-	Joined EventType = iota
-	Failed
-)
-
-// Update represents a change to the member list.
-type Update struct {
-	Member Member
-	Type   EventType
-	Round  int8
 }
