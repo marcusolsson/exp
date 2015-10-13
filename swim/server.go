@@ -19,14 +19,17 @@ type Server struct {
 	GossipInterval time.Duration
 
 	listener net.Listener
+
+	Logger *log.Logger
 }
 
 // NewServer returns a new instance of Server.
-func NewServer(bindAddr string) *Server {
+func NewServer(bindAddr string, logger *log.Logger) *Server {
 	return &Server{BindAddr: bindAddr,
 		Members:        NewList(2),
 		Self:           Member{Address: bindAddr},
-		GossipInterval: 1 * time.Second,
+		GossipInterval: 50 * time.Millisecond,
+		Logger:         logger,
 	}
 }
 
@@ -38,7 +41,7 @@ func (s *Server) Start() error {
 	}
 	s.listener = l
 
-	// Add myself to the membership list.
+	// Add myself to the local membership list.
 	s.Members.Add(s.Self)
 
 	// Start gossiping.
@@ -153,7 +156,7 @@ func (s *Server) Listen() error {
 				return err
 			}
 		default:
-			log.Println("unrecognized message type")
+			s.Logger.Println("unrecognized message type")
 		}
 	}
 }
@@ -175,10 +178,12 @@ func (s *Server) gossip() {
 		node := m[0]
 
 		if err := s.Ping(node.Address); err != nil {
+			s.Logger.Println("ping: failed to ping", node.Address)
+
 			k := 3
 			randmem, err := s.Members.Random(k, s.Self, node)
 			if err != nil {
-				log.Println(err)
+				s.Logger.Println(err)
 			}
 
 			var ok bool
@@ -190,6 +195,8 @@ func (s *Server) gossip() {
 			}
 
 			if !ok {
+				s.Logger.Println("ping-req: ack was not received, removing node", node.Address)
+
 				s.Members.Remove(node)
 			}
 		}
@@ -223,9 +230,11 @@ func (s *Server) handleJoin(w io.Writer, req messageJoin) {
 		Address: req.Address,
 	})
 
+	s.Logger.Printf("join: member %s", req.Address)
+
 	b, err := encodeMessage(joinResponseType, messageJoinResponse{Members: *s.Members})
 	if err != nil {
-		log.Println(err)
+		s.Logger.Println(err)
 	}
 
 	w.Write(b)
@@ -236,7 +245,7 @@ func (s *Server) handlePing(w io.Writer, req messageQuery) {
 
 	b, err := encodeMessage(queryResponseType, messageQueryResponse{Updates: s.Members.Updates})
 	if err != nil {
-		log.Println(err)
+		s.Logger.Println(err)
 	}
 
 	w.Write(b)
@@ -252,7 +261,7 @@ func (s *Server) handlePingReq(w io.Writer, req messageQuery) {
 
 	b, err := encodeMessage(queryResponseType, messageQueryResponse{Updates: s.Members.Updates, Ack: ack})
 	if err != nil {
-		log.Println(err)
+		s.Logger.Println(err)
 		return
 	}
 

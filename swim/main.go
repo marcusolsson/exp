@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 )
 
 var (
@@ -20,14 +21,22 @@ func main() {
 	flag.StringVar(&joinAddr, "join", "", "")
 	flag.Parse()
 
-	srv := NewServer(bindAddr)
-	srv.Start()
+	logger := log.New(os.Stdout, "swim: ", 0)
 
-	if joinAddr != "" {
-		srv.Join(joinAddr)
+	srv := NewServer(bindAddr, logger)
+	if err := srv.Start(); err != nil {
+		logger.Fatal("unable to start server")
 	}
 
+	if joinAddr != "" {
+		if err := srv.Join(joinAddr); err != nil {
+			logger.Fatalf("unable to join %s", joinAddr)
+		}
+	}
+
+	logger.Println("listening on", bindAddr)
+
 	if err := srv.Listen(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 }

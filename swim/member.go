@@ -33,26 +33,22 @@ func NewList(rounds int) *List {
 // Add adds a member to the member list.
 func (l *List) Add(m Member) {
 	if _, ok := l.Members[m.Address]; !ok {
-		if _, ok := l.Failed[m.Address]; ok {
-			log.Println(m.Address, "came back")
-		} else {
-			log.Println("adding", m.Address)
-		}
-
 		l.Members[m.Address] = m
 		l.Updates = append(l.Updates, Update{Member: m, Type: Joined})
 		delete(l.Failed, m.Address)
+
+		log.Println("added", m.Address)
 	}
 }
 
 // Remove removes a member from the member list.
 func (l *List) Remove(m Member) {
 	if _, ok := l.Members[m.Address]; ok {
-		log.Println("removing", m.Address)
-
 		l.Failed[m.Address] = m
 		l.Updates = append(l.Updates, Update{Member: m, Type: Failed})
 		delete(l.Members, m.Address)
+
+		log.Println("removed", m.Address)
 	}
 }
 
