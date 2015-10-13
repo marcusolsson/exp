@@ -24,11 +24,11 @@ type Server struct {
 }
 
 // NewServer returns a new instance of Server.
-func NewServer(bindAddr string, logger *log.Logger) *Server {
+func NewServer(bindAddr string, interval int, logger *log.Logger) *Server {
 	return &Server{BindAddr: bindAddr,
 		Members:        NewList(2),
 		Self:           Member{Address: bindAddr},
-		GossipInterval: 50 * time.Millisecond,
+		GossipInterval: time.Duration(interval) * time.Millisecond,
 		Logger:         logger,
 	}
 }

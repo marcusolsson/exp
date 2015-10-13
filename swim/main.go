@@ -7,23 +7,22 @@ import (
 )
 
 var (
-	defaultPort = "3001"
+	defaultPort     = "3001"
+	defaultInterval = 50 // ms
 )
-
-func init() {
-	log.SetFlags(log.Lshortfile)
-}
 
 func main() {
 	var bindAddr, joinAddr string
+	var interval int
 
 	flag.StringVar(&bindAddr, "bind", "0.0.0.0:"+defaultPort, "")
 	flag.StringVar(&joinAddr, "join", "", "")
+	flag.IntVar(&interval, "interval", defaultInterval, "")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "swim: ", 0)
 
-	srv := NewServer(bindAddr, logger)
+	srv := NewServer(bindAddr, interval, logger)
 	if err := srv.Start(); err != nil {
 		logger.Fatal("unable to start server")
 	}
