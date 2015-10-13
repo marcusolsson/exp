@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -174,32 +175,46 @@ func (s *Server) gossip() {
 		node := m[0]
 
 		if err := s.Ping(node.Address); err != nil {
-			log.Println("could not ping", node.Address)
-
 			k := 3
 			randmem, err := s.Members.Random(k, s.Self, node)
 			if err != nil {
 				log.Println(err)
 			}
 
-			log.Println("picked random members:", randmem)
+			var ok bool
+			for err := range s.sendPingReq(node, randmem) {
+				if err == nil {
+					ok = true
+					break
+				}
+			}
 
-			if err := s.sendPingReq(node, randmem); err != nil {
+			if !ok {
 				s.Members.Remove(node)
 			}
 		}
 	}
 }
 
-func (s *Server) sendPingReq(node Member, members []Member) error {
-	for _, m := range members {
-		log.Println("sending ping-req to", m.Address)
+func (s *Server) sendPingReq(node Member, members []Member) <-chan error {
+	var wg sync.WaitGroup
+	wg.Add(len(members))
 
-		if err := s.PingReq(m, node); err == nil {
-			return nil
-		}
+	ch := make(chan error)
+
+	for _, m := range members {
+		go func(m Member) {
+			ch <- s.PingReq(m, node)
+			wg.Done()
+		}(m)
 	}
-	return errors.New("ping-req failed")
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	return ch
 }
 
 func (s *Server) handleJoin(w io.Writer, req messageJoin) {
