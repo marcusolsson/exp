@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/marcusolsson/typiskt/round"
+	"github.com/marcusolsson/exp/typiskt/round"
 	"github.com/nsf/termbox-go"
 )
 
