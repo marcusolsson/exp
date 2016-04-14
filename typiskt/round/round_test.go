@@ -13,11 +13,11 @@ func TestOneWord_Correct(t *testing.T) {
 
 	r.Start()
 
-	r.AdvanceChar('t')
-	r.AdvanceChar('e')
-	r.AdvanceChar('s')
-	r.AdvanceChar('t')
-	r.AdvanceWord()
+	r.Advance('t')
+	r.Advance('e')
+	r.Advance('s')
+	r.Advance('t')
+	r.Next()
 
 	r.Stop()
 
@@ -36,11 +36,11 @@ func TestOneWord_Mistyped(t *testing.T) {
 
 	r.Start()
 
-	r.AdvanceChar('t')
-	r.AdvanceChar('a')
-	r.AdvanceChar('s')
-	r.AdvanceChar('t')
-	r.AdvanceWord()
+	r.Advance('t')
+	r.Advance('a')
+	r.Advance('s')
+	r.Advance('t')
+	r.Next()
 
 	r.Stop()
 
@@ -59,10 +59,10 @@ func TestOneWord_EarlyNext(t *testing.T) {
 
 	r.Start()
 
-	r.AdvanceChar('t')
-	r.AdvanceChar('e')
-	r.AdvanceChar('s')
-	r.AdvanceWord()
+	r.Advance('t')
+	r.Advance('e')
+	r.Advance('s')
+	r.Next()
 
 	r.Stop()
 
@@ -81,16 +81,16 @@ func TestTwoWords_Correct(t *testing.T) {
 
 	r.Start()
 
-	r.AdvanceChar('t')
-	r.AdvanceChar('e')
-	r.AdvanceChar('s')
-	r.AdvanceChar('t')
-	r.AdvanceWord()
-	r.AdvanceChar('w')
-	r.AdvanceChar('o')
-	r.AdvanceChar('r')
-	r.AdvanceChar('d')
-	r.AdvanceWord()
+	r.Advance('t')
+	r.Advance('e')
+	r.Advance('s')
+	r.Advance('t')
+	r.Next()
+	r.Advance('w')
+	r.Advance('o')
+	r.Advance('r')
+	r.Advance('d')
+	r.Next()
 
 	r.Stop()
 
@@ -109,15 +109,15 @@ func TestTwoWords_Mistyped(t *testing.T) {
 
 	r.Start()
 
-	r.AdvanceChar('t')
-	r.AdvanceChar('e')
-	r.AdvanceChar('t')
-	r.AdvanceWord()
-	r.AdvanceChar('w')
-	r.AdvanceChar('o')
-	r.AdvanceChar('r')
-	r.AdvanceChar('d')
-	r.AdvanceWord()
+	r.Advance('t')
+	r.Advance('e')
+	r.Advance('t')
+	r.Next()
+	r.Advance('w')
+	r.Advance('o')
+	r.Advance('r')
+	r.Advance('d')
+	r.Next()
 
 	r.Stop()
 
@@ -136,17 +136,17 @@ func TestTwoWords_Stopped(t *testing.T) {
 
 	r.Start()
 
-	r.AdvanceChar('t')
-	r.AdvanceChar('e')
-	r.AdvanceChar('s')
-	r.AdvanceChar('t')
-	r.AdvanceWord()
-	r.AdvanceChar('w')
-	r.AdvanceChar('o')
+	r.Advance('t')
+	r.Advance('e')
+	r.Advance('s')
+	r.Advance('t')
+	r.Next()
+	r.Advance('w')
+	r.Advance('o')
 	r.Stop()
-	r.AdvanceChar('r')
-	r.AdvanceChar('d')
-	r.AdvanceWord()
+	r.Advance('r')
+	r.Advance('d')
+	r.Next()
 
 	if got := len(r.Typed()); got != 7 {
 		t.Errorf("len(r.Typed) = %d; want = %d", got, 7)
