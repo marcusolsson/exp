@@ -7,8 +7,10 @@ import (
 	"math"
 	"os"
 	"time"
+	"unicode"
 
 	"github.com/marcusolsson/exp/typiskt/round"
+	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
 
@@ -81,6 +83,11 @@ loop:
 					startRound()
 					fallthrough
 				default:
+					if unicode.IsSpace(ev.Ch) {
+						if err := currRound.Next(); err != nil {
+							break
+						}
+					}
 					currRound.Advance(ev.Ch)
 				}
 			}
@@ -116,7 +123,7 @@ func restartRound() {
 func drawString(x, y, offx int, fg, bg termbox.Attribute, msg string) (int, int) {
 	for _, c := range msg {
 		termbox.SetCell(x+offx, y, c, fg, bg)
-		x++
+		x += runewidth.RuneWidth(c)
 	}
 
 	return x, y
