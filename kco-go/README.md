@@ -1,7 +1,7 @@
 # Klarna Checkout Go SDK
 
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/marcusolsson/kco-go)
-[![License MIT](https://img.shields.io/badge/license-apache-lightgrey.svg?style=flat)](LICENSE)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/marcusolsson/exp/kco-go)
+[![License Apache](https://img.shields.io/badge/license-apache-lightgrey.svg?style=flat)](LICENSE)
 
 This is an __unofficial__ client package for accessing the Klarna Checkout API.
 
